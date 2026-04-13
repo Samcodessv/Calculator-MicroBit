@@ -1,23 +1,52 @@
-# Initialize the operations list with the new square root operation
-operations = ["+", "-", "*", "/", "√"]  # Updated to include square root as the 5th operation
+from microbit import *
 
-# Calculate function
+class Calculator:
+    def __init__(self):
+        self.display = display
 
-def calculate_and_show(operation_index, num1, num2=0):
-    # Modifying modulo operation from % 4 to % 5
-    operation_index = operation_index % 5  # Updated to cycle through 5 operations
-    
-    if operation_index == 0:
-        result = num1 + num2
-    elif operation_index == 1:
-        result = num1 - num2
-    elif operation_index == 2:
-        result = num1 * num2
-    elif operation_index == 3:
-        result = num1 / num2
-    elif operation_index == 4:
-        result = int(num1 ** 0.5)  # Square root using exponentiation
-    else:
-        result = 0  # Changed from "Invalid operation" string to 0
-    # Code to display the result not shown here
-    return result
+    def show_result(self, result):
+        self.display.scroll(str(result))
+
+    def get_input(self):
+        num1 = self.prompt_num("Enter first number:")
+        operation = self.prompt_operation()
+        num2 = self.prompt_num("Enter second number:")
+        return num1, operation, num2
+
+    def prompt_num(self, message):
+        self.display.scroll(message)
+        num = ''
+        while True:
+            if button_a.is_pressed():
+                if num:
+                    return int(num)
+            if button_b.is_pressed():
+                num += '1'
+                self.display.show(num)
+            sleep(100)
+
+    def prompt_operation(self):
+        operation = ''
+        self.display.scroll("Select: A for +, B for -")
+        while True:
+            if button_a.is_pressed():
+                return '+'
+            if button_b.is_pressed():
+                return '-'
+            sleep(100)
+
+    def calculate(self, num1, operation, num2):
+        if operation == '+':
+            return num1 + num2
+        elif operation == '-':
+            return num1 - num2
+
+    def run(self):
+        while True:
+            num1, operation, num2 = self.get_input()
+            result = self.calculate(num1, operation, num2)
+            self.show_result(result)
+
+if __name__ == '__main__':
+    calc = Calculator()
+    calc.run()
