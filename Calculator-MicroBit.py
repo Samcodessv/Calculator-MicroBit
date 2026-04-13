@@ -1,11 +1,11 @@
 """
 
-Başlangıç değişkenleri
+Initial variables
 
 """
 """
 
-0: İşlem seçimi, 1: Birinci sayı, 2: İkinci sayı, 3: Sonuç
+0: Operation selection, 1: First number, 2: Second number, 3: Result
 
 """
 """
@@ -13,89 +13,93 @@ Başlangıç değişkenleri
 0: +, 1: -, 2: *, 3: /
 
 """
-# Sistemi sıfırlayıp başa döndüren fonksiyon
-def hesap_sifirla():
-    global durum, islem_index, sayi1, sayi2
-    durum = 0
-    islem_index = 0
-    sayi1 = 0
-    sayi2 = 0
-    ekran_guncelle()
-# A Tuşuna basıldığında (Seçenekler arasında gezinme)
+# Function that resets the system and returns to the beginning
+def reset_calculator():
+    global status, operation_index, num1, num2
+    status = 0
+    operation_index = 0
+    num1 = 0
+    num2 = 0
+    update_display()
 
+# When Button A is pressed (Navigate between options)
 def on_button_pressed_a():
-    global islem_index, sayi1, sayi2
-    if durum == 0:
-        # İşlemleri değiştir (0'dan 3'e kadar, 4 olunca 0'a döner)
-        islem_index = (islem_index + 1) % 4
-    elif durum == 1:
-        # 1. sayıyı artır (0-9 arası)
-        sayi1 = (sayi1 + 1) % 10
-    elif durum == 2:
-        # 2. sayıyı artır (0-9 arası)
-        sayi2 = (sayi2 + 1) % 10
-    elif durum == 3:
-        # Sonuç ekranındayken A'ya basılırsa başa dön
-        hesap_sifirla()
+    global operation_index, num1, num2
+    if status == 0:
+        # Change operations (0 to 3, when 4 returns to 0)
+        operation_index = (operation_index + 1) % 4
+    elif status == 1:
+        # Increment first number (0-9 range)
+        num1 = (num1 + 1) % 10
+    elif status == 2:
+        # Increment second number (0-9 range)
+        num2 = (num2 + 1) % 10
+    elif status == 3:
+        # When on result screen and A is pressed, go back to start
+        reset_calculator()
         return
-    ekran_guncelle()
+    update_display()
+
 input.on_button_pressed(Button.A, on_button_pressed_a)
 
-# Ekranda o anki durumu gösterecek fonksiyon
-def ekran_guncelle():
-    if durum == 0:
-        basic.show_string("" + (islemler[islem_index]))
-    elif durum == 1:
-        basic.show_number(sayi1)
-    elif durum == 2:
-        basic.show_number(sayi2)
-# B Tuşuna basıldığında (Onaylama / İleri gitme)
+# Function to display current status on screen
+def update_display():
+    if status == 0:
+        basic.show_string("" + (operations[operation_index]))
+    elif status == 1:
+        basic.show_number(num1)
+    elif status == 2:
+        basic.show_number(num2)
 
+# When Button B is pressed (Confirm / Move forward)
 def on_button_pressed_b():
-    global durum
-    if durum == 0:
-        durum = 1
-        # 1. sayı seçimine geç
-        ekran_guncelle()
-    elif durum == 1:
-        durum = 2
-        # 2. sayı seçimine geç
-        ekran_guncelle()
-    elif durum == 2:
-        durum = 3
-        # Sonucu hesapla ve göster
-        hesapla_ve_goster()
-    elif durum == 3:
-        # Sonuç ekranındayken B'ye basılırsa başa dön
-        hesap_sifirla()
+    global status
+    if status == 0:
+        status = 1
+        # Move to first number selection
+        update_display()
+    elif status == 1:
+        status = 2
+        # Move to second number selection
+        update_display()
+    elif status == 2:
+        status = 3
+        # Calculate and show result
+        calculate_and_show()
+    elif status == 3:
+        # When on result screen and B is pressed, go back to start
+        reset_calculator()
+
 input.on_button_pressed(Button.B, on_button_pressed_b)
 
-# Matematiksel işlemi yapıp LED'de gösteren fonksiyon
-def hesapla_ve_goster():
-    global sonuc
+# Function that performs mathematical operation and displays on LED
+def calculate_and_show():
+    global result
     basic.clear_screen()
     basic.pause(200)
-    # Hesaplıyor hissi vermek için kısa bir bekleme
-    if islem_index == 0:
-        sonuc = sayi1 + sayi2
-    elif islem_index == 1:
-        sonuc = sayi1 - sayi2
-    elif islem_index == 2:
-        sonuc = sayi1 * sayi2
-    elif islem_index == 3:
-        # Sıfıra bölünme hatasını engelle
-        if sayi2 == 0:
-            basic.show_string("HATA")
+    # Brief pause to give the impression of calculating
+    if operation_index == 0:
+        result = num1 + num2
+    elif operation_index == 1:
+        result = num1 - num2
+    elif operation_index == 2:
+        result = num1 * num2
+    elif operation_index == 3:
+        # Prevent division by zero error
+        if num2 == 0:
+            basic.show_string("ERROR")
             return
         else:
-            sonuc = sayi1 / sayi2
-    basic.show_number(sonuc)
-sonuc = 0
-sayi2 = 0
-sayi1 = 0
-islem_index = 0
-durum = 0
-islemler: List[str] = []
-islemler = ["+", "-", "*", "/"]
-# Cihaz açıldığında ilk ekranı göster
-ekran_guncelle()
+            result = num1 / num2
+    basic.show_number(result)
+
+result = 0
+num2 = 0
+num1 = 0
+operation_index = 0
+status = 0
+operations: List[str] = []
+operations = ["+", "-", "*", "/"]
+
+# Show initial screen when
+
